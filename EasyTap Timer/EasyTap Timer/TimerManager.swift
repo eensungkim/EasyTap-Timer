@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class TimerManager {
+final class TimerManager {
     var remainingTime: TimeInterval = 60.0 {
         didSet {
             delegate?.timerDidUpdate(time: remainingTime)

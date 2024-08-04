@@ -8,9 +8,15 @@
 import UIKit
 import AVFoundation
 
-class MainViewController: UIViewController, TimerManagerDelegate {
+final class MainViewController: UIViewController, TimerManagerDelegate {
     private var timerManager: TimerManager
-    private var timeLabel: UILabel!
+    private var timeLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.monospacedDigitSystemFont(ofSize: 48, weight: .bold)
+        label.textAlignment = .center
+        label.text = "Tap to Start"
+        return label
+    }()
     
     init(timerManager: TimerManager) {
         self.timerManager = timerManager
@@ -34,14 +40,9 @@ class MainViewController: UIViewController, TimerManagerDelegate {
     }
 
     private func setupUI() {
-        timeLabel = UILabel()
-        timeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 48, weight: .bold)
-        timeLabel.textAlignment = .center
-        timeLabel.text = "Tap to Start"
-        timeLabel.translatesAutoresizingMaskIntoConstraints = false
-
         view.addSubview(timeLabel)
 
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             timeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)

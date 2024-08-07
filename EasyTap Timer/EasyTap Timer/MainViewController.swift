@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  MainViewController.swift
 //  EasyTap Timer
 //
 //  Created by Kim EenSung on 8/4/24.
@@ -17,15 +17,21 @@ final class MainViewController: UIViewController {
         label.text = "Tap to Start"
         return label
     }()
-    private var timeSlider: UISlider = {
-        let slider = UISlider()
-        slider.minimumValue = 5
-        slider.maximumValue = 600
-        slider.value = 60
-        slider.isContinuous = true
-        return slider
+    private var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsHorizontalScrollIndicator = false
+        return scrollView
     }()
-    
+    private var rulerView: UIView = {
+        let view = UIView()
+        return view
+    }()
+    private var indicatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .red
+        return view
+    }()
+
     init(timerManager: TimerManager) {
         self.timerManager = timerManager
         super.init(nibName: nil, bundle: nil)
@@ -42,7 +48,7 @@ final class MainViewController: UIViewController {
         timerManager.delegate = self
 
         setupUI()
-        setupSlider()
+        setupRuler()
         setupGestureRecognizers()
 
         NotificationCenter.default.addObserver(self, selector: #selector(timerDidEnd), name: .timerDidEnd, object: nil)
@@ -50,21 +56,51 @@ final class MainViewController: UIViewController {
 
     private func setupUI() {
         view.addSubview(timeLabel)
-        view.addSubview(timeSlider)
+        view.addSubview(scrollView)
+        scrollView.addSubview(rulerView)
+        view.addSubview(indicatorView)
 
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
-        timeSlider.translatesAutoresizingMaskIntoConstraints = false
-        
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        rulerView.translatesAutoresizingMaskIntoConstraints = false
+        indicatorView.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
             timeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            timeSlider.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            timeSlider.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            timeSlider.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 20)
+            timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            scrollView.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 20),
+            scrollView.heightAnchor.constraint(equalToConstant: 50),
+            rulerView.heightAnchor.constraint(equalTo: scrollView.heightAnchor),
+            rulerView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            rulerView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            rulerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            rulerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            rulerView.widthAnchor.constraint(equalToConstant: 6000), // Adjust this value as needed
+            indicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            indicatorView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            indicatorView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            indicatorView.widthAnchor.constraint(equalToConstant: 2)
         ])
     }
-    private func setupSlider() {
-        timeSlider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
+
+    private func setupRuler() {
+        let tickInterval: CGFloat = 10.0
+        let totalTicks = 600 / 5
+        for i in 0...totalTicks {
+            let tickView = UIView()
+            tickView.backgroundColor = .black
+            tickView.translatesAutoresizingMaskIntoConstraints = false
+            rulerView.addSubview(tickView)
+
+            NSLayoutConstraint.activate([
+                tickView.widthAnchor.constraint(equalToConstant: 2),
+                tickView.heightAnchor.constraint(equalToConstant: i % 12 == 0 ? 30 : 15),
+                tickView.leadingAnchor.constraint(equalTo: rulerView.leadingAnchor, constant: CGFloat(i) * tickInterval),
+                tickView.centerYAnchor.constraint(equalTo: rulerView.centerYAnchor)
+            ])
+        }
     }
 
     private func setupGestureRecognizers() {
@@ -74,6 +110,9 @@ final class MainViewController: UIViewController {
         let swipeDownGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
         swipeDownGesture.direction = .down
         view.addGestureRecognizer(swipeDownGesture)
+        
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        scrollView.addGestureRecognizer(panGesture)
     }
 
     @objc private func handleTap() {
@@ -93,12 +132,16 @@ final class MainViewController: UIViewController {
         }
     }
     
-    @objc private func sliderValueChanged(_ sender: UISlider) {
-        let step: Float = 5
-        let roundedValue = round(sender.value / step) * step
-        sender.value = roundedValue
-        timerManager.updateTime(to: TimeInterval(roundedValue))
-        timeLabel.text = formattedTime(TimeInterval(roundedValue))
+    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: scrollView)
+        let newOffsetX = scrollView.contentOffset.x - translation.x
+        scrollView.contentOffset.x = max(0, min(newOffsetX, scrollView.contentSize.width - scrollView.bounds.width))
+        gesture.setTranslation(.zero, in: scrollView)
+        
+        let step: CGFloat = 10.0
+        let value = scrollView.contentOffset.x / step * 5
+        timerManager.updateTime(to: TimeInterval(value))
+        timeLabel.text = formattedTime(TimeInterval(value))
     }
 
     @objc private func timerDidEnd() {

@@ -8,7 +8,7 @@
 import UIKit
 import AVFoundation
 
-final class MainViewController: UIViewController, TimerManagerDelegate {
+final class MainViewController: UIViewController {
     private var timerManager: TimerManager
     private var timeLabel: UILabel = {
         let label = UILabel()
@@ -29,7 +29,7 @@ final class MainViewController: UIViewController, TimerManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
 
         timerManager.delegate = self
 
@@ -52,7 +52,8 @@ final class MainViewController: UIViewController, TimerManagerDelegate {
     private func setupGestureRecognizers() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         view.addGestureRecognizer(tapGesture)
-
+        
+        // 이 부분 panGesture 맞는지 확인 필요
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         panGesture.minimumNumberOfTouches = 1
         panGesture.maximumNumberOfTouches = 1
@@ -68,17 +69,10 @@ final class MainViewController: UIViewController, TimerManagerDelegate {
     }
 
     @objc private func handlePan(gesture: UIPanGestureRecognizer) {
+        // 마찬가지로 panGesture 관련해서 확인 필요
         if gesture.state == .ended {
             timerManager.resetTimer()
         }
-    }
-
-    func timerDidUpdate(time: TimeInterval) {
-        timeLabel.text = formattedTime(time)
-    }
-
-    func timerDidChangeState(isRunning: Bool) {
-        view.backgroundColor = isRunning ? .red : .white
     }
 
     @objc private func timerDidEnd() {
@@ -97,5 +91,15 @@ final class MainViewController: UIViewController, TimerManagerDelegate {
 
     private func playSound() {
         AudioServicesPlaySystemSound(1005)
+    }
+}
+
+extension MainViewController: TimerManagerDelegate {
+    func timerDidUpdate(time: TimeInterval) {
+        timeLabel.text = formattedTime(time)
+    }
+
+    func timerDidChangeState(isRunning: Bool) {
+        view.backgroundColor = isRunning ? .red : .systemBackground
     }
 }

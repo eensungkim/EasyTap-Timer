@@ -8,13 +8,18 @@
 import Foundation
 import UIKit
 
+protocol TimerManagerDelegate: AnyObject {
+    func timerDidUpdate(time: TimeInterval)
+    func timerDidChangeState(isRunning: Bool)
+}
+
 final class TimerManager {
-    var remainingTime: TimeInterval = 60.0 {
+    private var remainingTime: TimeInterval = 60.0 {
         didSet {
             delegate?.timerDidUpdate(time: remainingTime)
         }
     }
-    var isTimerRunning: Bool = false {
+    private(set) var isTimerRunning: Bool = false {
         didSet {
             delegate?.timerDidChangeState(isRunning: isTimerRunning)
         }
@@ -52,11 +57,6 @@ final class TimerManager {
             NotificationCenter.default.post(name: .timerDidEnd, object: nil)
         }
     }
-}
-
-protocol TimerManagerDelegate: AnyObject {
-    func timerDidUpdate(time: TimeInterval)
-    func timerDidChangeState(isRunning: Bool)
 }
 
 extension Notification.Name {

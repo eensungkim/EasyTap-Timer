@@ -60,6 +60,20 @@ final class TimerManager {
             NotificationCenter.default.post(name: .timerDidEnd, object: nil)
         }
     }
+    
+    func increaseTime(by seconds: TimeInterval) {
+        userSetTime = min(userSetTime + seconds, 600) // 10분 = 600초
+        if !isTimerRunning {
+            remainingTime = userSetTime
+        }
+    }
+
+    func decreaseTime(by seconds: TimeInterval) {
+        userSetTime = max(userSetTime - seconds, 5) // 최소 5초
+        if !isTimerRunning {
+            remainingTime = userSetTime
+        }
+    }
 }
 
 extension Notification.Name {

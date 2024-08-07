@@ -17,12 +17,13 @@ final class MainViewController: UIViewController {
         label.text = "Tap to Start"
         return label
     }()
-    private var swipeLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.monospacedDigitSystemFont(ofSize: 20, weight: .bold)
-        label.textAlignment = .center
-        label.isHidden = true
-        return label
+    private var timeSlider: UISlider = {
+        let slider = UISlider()
+        slider.minimumValue = 5
+        slider.maximumValue = 600
+        slider.value = 60
+        slider.isContinuous = true
+        return slider
     }()
     
     init(timerManager: TimerManager) {
@@ -41,7 +42,7 @@ final class MainViewController: UIViewController {
         timerManager.delegate = self
 
         setupUI()
-        setupSwipeLabel()
+        setupSlider()
         setupGestureRecognizers()
 
         NotificationCenter.default.addObserver(self, selector: #selector(timerDidEnd), name: .timerDidEnd, object: nil)
@@ -49,37 +50,27 @@ final class MainViewController: UIViewController {
 
     private func setupUI() {
         view.addSubview(timeLabel)
+        view.addSubview(timeSlider)
 
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
+        timeSlider.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             timeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            timeSlider.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            timeSlider.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            timeSlider.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 20)
         ])
     }
-    private func setupSwipeLabel() {
-        view.addSubview(swipeLabel)
-
-        swipeLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            swipeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            swipeLabel.bottomAnchor.constraint(equalTo: timeLabel.topAnchor, constant: -20)
-        ])
+    private func setupSlider() {
+        timeSlider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
     }
 
     private func setupGestureRecognizers() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         view.addGestureRecognizer(tapGesture)
         
-        // 이 부분 panGesture 맞는지 확인 필요
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-        panGesture.minimumNumberOfTouches = 1
-        panGesture.maximumNumberOfTouches = 1
-        view.addGestureRecognizer(panGesture)
-        
-        let swipeUpGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
-        swipeUpGesture.direction = .up
-        view.addGestureRecognizer(swipeUpGesture)
-
         let swipeDownGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
         swipeDownGesture.direction = .down
         view.addGestureRecognizer(swipeDownGesture)
@@ -92,25 +83,22 @@ final class MainViewController: UIViewController {
             timerManager.startTimer()
         }
     }
-
-    @objc private func handlePan(gesture: UIPanGestureRecognizer) {
-        // 마찬가지로 panGesture 관련해서 확인 필요
-        if gesture.state == .ended {
-            timerManager.resetTimer()
-        }
-    }
     
     @objc private func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
         switch gesture.direction {
-        case .up:
-            timerManager.increaseTime(by: 5)
-            showSwipeLabel("Time +5s")
         case .down:
-            timerManager.decreaseTime(by: 5)
-            showSwipeLabel("Time -5s")
+            timerManager.resetTimer()
         default:
             break
         }
+    }
+    
+    @objc private func sliderValueChanged(_ sender: UISlider) {
+        let step: Float = 5
+        let roundedValue = round(sender.value / step) * step
+        sender.value = roundedValue
+        timerManager.updateTime(to: TimeInterval(roundedValue))
+        timeLabel.text = formattedTime(TimeInterval(roundedValue))
     }
 
     @objc private func timerDidEnd() {
@@ -125,15 +113,6 @@ final class MainViewController: UIViewController {
         let seconds = Int(time) % 60
         let milliseconds = Int((time - TimeInterval(minutes * 60) - TimeInterval(seconds)) * 100)
         return String(format: "%02d:%02d.%02d", minutes, seconds, milliseconds)
-    }
-    
-    private func showSwipeLabel(_ text: String) {
-        swipeLabel.text = text
-        swipeLabel.isHidden = false
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            self?.swipeLabel.isHidden = true
-        }
     }
 
     private func playSound() {

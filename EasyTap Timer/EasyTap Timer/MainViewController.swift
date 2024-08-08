@@ -69,12 +69,28 @@ final class MainViewController: UIViewController {
             indicatorView.widthAnchor.constraint(equalToConstant: 3)
         ])
     }
-
+    
     @objc private func timerDidEnd() {
-        let alert = UIAlertController(title: "Timer Ended", message: "Tap to dismiss", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
+        // 알림 콘텐츠 생성
+        let content = UNMutableNotificationContent()
+        content.title = "Timer Ended"
+        content.body = "Tap to dismiss"
+        content.sound = UNNotificationSound.default
+
+        // 즉시 발송되는 트리거 생성
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.01, repeats: false)
+
+        // 알림 요청 생성
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+
+        // 알림 추가
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error adding notification: \(error.localizedDescription)")
+            }
+        }
         
+        // 기존 기능 유지
         let currentOffset = rulerScrollView.contentOffset.x
         updateTimeAndLabel(with: currentOffset)
         

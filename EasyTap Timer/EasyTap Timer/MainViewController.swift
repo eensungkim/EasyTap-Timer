@@ -40,18 +40,14 @@ final class MainViewController: UIViewController {
 
         setupUI()
         setupGestureRecognizers()
+        updateScrollViewOffset()
 
         NotificationCenter.default.addObserver(self, selector: #selector(timerDidEnd), name: .timerDidEnd, object: nil)
-
-        // 중앙을 초기 위치로 설정
-        rulerScrollView.contentOffset.x = 0
-        updateScrollViewOffset()
     }
 
     private func setupUI() {
         view.addSubview(timeLabel)
         view.addSubview(rulerScrollView)
-        
         view.addSubview(indicatorView)
 
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -70,11 +66,9 @@ final class MainViewController: UIViewController {
             indicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             indicatorView.topAnchor.constraint(equalTo: rulerScrollView.topAnchor),
             indicatorView.bottomAnchor.constraint(equalTo: rulerScrollView.bottomAnchor),
-            indicatorView.widthAnchor.constraint(equalToConstant: 2)
+            indicatorView.widthAnchor.constraint(equalToConstant: 3)
         ])
     }
-
-    
 
     private func setupGestureRecognizers() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))

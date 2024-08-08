@@ -13,6 +13,7 @@
 		8A5571192C5F8D9C00AE5B41 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A5571182C5F8D9C00AE5B41 /* Assets.xcassets */; };
 		8A55711C2C5F8D9C00AE5B41 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 8A55711B2C5F8D9C00AE5B41 /* Base */; };
 		8AD7CBA22C5F91FD00E5F78D /* TimerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD7CBA12C5F91FD00E5F78D /* TimerManager.swift */; };
+		8AD7CBA42C64546600E5F78D /* RulerScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD7CBA32C64546600E5F78D /* RulerScrollView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		8A55711B2C5F8D9C00AE5B41 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8A55711D2C5F8D9C00AE5B41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8AD7CBA12C5F91FD00E5F78D /* TimerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerManager.swift; sourceTree = "<group>"; };
+		8AD7CBA32C64546600E5F78D /* RulerScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulerScrollView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +61,7 @@
 				8A55710F2C5F8D9B00AE5B41 /* AppDelegate.swift */,
 				8A5571112C5F8D9B00AE5B41 /* SceneDelegate.swift */,
 				8A5571132C5F8D9B00AE5B41 /* MainViewController.swift */,
+				8AD7CBA32C64546600E5F78D /* RulerScrollView.swift */,
 				8AD7CBA12C5F91FD00E5F78D /* TimerManager.swift */,
 				8A5571182C5F8D9C00AE5B41 /* Assets.xcassets */,
 				8A55711A2C5F8D9C00AE5B41 /* LaunchScreen.storyboard */,
@@ -140,6 +143,7 @@
 				8A5571142C5F8D9B00AE5B41 /* MainViewController.swift in Sources */,
 				8AD7CBA22C5F91FD00E5F78D /* TimerManager.swift in Sources */,
 				8A5571102C5F8D9B00AE5B41 /* AppDelegate.swift in Sources */,
+				8AD7CBA42C64546600E5F78D /* RulerScrollView.swift in Sources */,
 				8A5571122C5F8D9B00AE5B41 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

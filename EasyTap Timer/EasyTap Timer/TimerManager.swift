@@ -14,7 +14,7 @@ protocol TimerManagerDelegate: AnyObject {
 }
 
 final class TimerManager {
-    private var userSetTime: TimeInterval = 60.0
+    private var userSetTime: TimeInterval = TimerConstants.InitialTimerValue
     private lazy var remainingTime: TimeInterval = userSetTime {
         didSet {
             delegate?.timerDidUpdate(time: remainingTime)

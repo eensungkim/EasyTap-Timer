@@ -113,8 +113,8 @@ final class MainViewController: UIViewController {
         
         if gesture.state == .ended {
             // 팬 제스처가 종료될 때, 가장 가까운 눈금으로 오프셋을 스냅
-            let nearestTickOffset = round(currentOffset / rulerScrollView.TICK_INTERVAL) * rulerScrollView.TICK_INTERVAL
-            UIView.animate(withDuration: 0.3) {
+            let nearestTickOffset = round(currentOffset / TimerConstants.TickInterval) * TimerConstants.TickInterval
+            UIView.animate(withDuration: 0.2) {
                 self.rulerScrollView.contentOffset.x = nearestTickOffset
             }
         }
@@ -132,7 +132,7 @@ final class MainViewController: UIViewController {
     }
     
     private func updateTimeAndLabel(with currentOffset: CGFloat) {
-        let value = round(currentOffset / rulerScrollView.TICK_INTERVAL) * rulerScrollView.TIME_STEP
+        let value = round(currentOffset / TimerConstants.TickInterval) * TimerConstants.TimeStep
         timerManager.updateTime(to: TimeInterval(value))
         timeLabel.text = formattedTime(TimeInterval(value))
     }

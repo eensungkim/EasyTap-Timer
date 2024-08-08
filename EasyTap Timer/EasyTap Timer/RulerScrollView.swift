@@ -13,10 +13,6 @@ final class RulerScrollView: UIScrollView {
         return view
     }()
     
-    let TICK_INTERVAL: CGFloat = 10.0
-    let MAX_TIME: CGFloat = 600.0
-    let TIME_STEP: CGFloat = 5.0
-    
     init(viewWidth: CGFloat) {
         super.init(frame: CGRect())
         setupUI(viewWidth: viewWidth)
@@ -38,12 +34,12 @@ final class RulerScrollView: UIScrollView {
             rulerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             rulerView.leadingAnchor.constraint(equalTo: leadingAnchor),
             rulerView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            rulerView.widthAnchor.constraint(equalToConstant: (MAX_TIME / TIME_STEP) * TICK_INTERVAL + viewWidth),
+            rulerView.widthAnchor.constraint(equalToConstant: TimerConstants.TotalTicks * TimerConstants.TickInterval + viewWidth),
         ])
     }
     
     private func setupRuler(viewWidth: CGFloat) {
-        let totalTicks = Int(MAX_TIME / TIME_STEP)
+        let totalTicks = Int(TimerConstants.TotalTicks)
         for i in 0...totalTicks {
             let tickView = UIView()
             tickView.backgroundColor = .black
@@ -53,7 +49,7 @@ final class RulerScrollView: UIScrollView {
             NSLayoutConstraint.activate([
                 tickView.widthAnchor.constraint(equalToConstant: 2),
                 tickView.heightAnchor.constraint(equalToConstant: i % 12 == 0 ? 30 : 15),
-                tickView.leadingAnchor.constraint(equalTo: rulerView.leadingAnchor, constant: CGFloat(i) * TICK_INTERVAL + viewWidth / 2),
+                tickView.leadingAnchor.constraint(equalTo: rulerView.leadingAnchor, constant: CGFloat(i) * TimerConstants.TickInterval + viewWidth / 2),
                 tickView.centerYAnchor.constraint(equalTo: rulerView.centerYAnchor)
             ])
         }

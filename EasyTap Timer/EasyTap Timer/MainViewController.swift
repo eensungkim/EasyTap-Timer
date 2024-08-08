@@ -101,21 +101,40 @@ final class MainViewController: UIViewController {
     
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: rulerScrollView)
-        let newOffsetX = rulerScrollView.contentOffset.x - translation.x
+        let velocity = gesture.velocity(in: rulerScrollView)
+        let velocityFactor: CGFloat = 0.01 // 속도 조정 비율 (필요에 따라 조정 가능)
+        
+        let newOffsetX = rulerScrollView.contentOffset.x - translation.x - (velocity.x * velocityFactor)
         rulerScrollView.contentOffset.x = max(0, min(newOffsetX, rulerScrollView.contentSize.width - rulerScrollView.bounds.width))
         gesture.setTranslation(.zero, in: rulerScrollView)
         
         let currentOffset = rulerScrollView.contentOffset.x
-        let value = round(currentOffset / rulerScrollView.TICK_INTERVAL) * rulerScrollView.TIME_STEP
-        timerManager.updateTime(to: TimeInterval(value))
-        timeLabel.text = formattedTime(TimeInterval(value))
+        updateTimeAndLabel(with: currentOffset)
+        
+        if gesture.state == .ended {
+            // 팬 제스처가 종료될 때, 가장 가까운 눈금으로 오프셋을 스냅
+            let nearestTickOffset = round(currentOffset / rulerScrollView.TICK_INTERVAL) * rulerScrollView.TICK_INTERVAL
+            UIView.animate(withDuration: 0.3) {
+                self.rulerScrollView.contentOffset.x = nearestTickOffset
+            }
+        }
     }
 
     @objc private func timerDidEnd() {
         let alert = UIAlertController(title: "Timer Ended", message: "Tap to dismiss", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
+        
+        let currentOffset = rulerScrollView.contentOffset.x
+        updateTimeAndLabel(with: currentOffset)
+        
         playSound()
+    }
+    
+    private func updateTimeAndLabel(with currentOffset: CGFloat) {
+        let value = round(currentOffset / rulerScrollView.TICK_INTERVAL) * rulerScrollView.TIME_STEP
+        timerManager.updateTime(to: TimeInterval(value))
+        timeLabel.text = formattedTime(TimeInterval(value))
     }
 
     private func formattedTime(_ time: TimeInterval) -> String {

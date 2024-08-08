@@ -54,7 +54,8 @@ final class TimerManager {
     func updateTime(to time: TimeInterval) {
         userSetTime = time
         if !isTimerRunning {
-            remainingTime = userSetTime
+            initialTime = userSetTime
+            remainingTime = initialTime
         }
     }
 

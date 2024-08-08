@@ -70,56 +70,6 @@ final class MainViewController: UIViewController {
         ])
     }
 
-    private func setupGestureRecognizers() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        view.addGestureRecognizer(tapGesture)
-        
-        let swipeDownGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
-        swipeDownGesture.direction = .down
-        view.addGestureRecognizer(swipeDownGesture)
-        
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
-        rulerScrollView.addGestureRecognizer(panGesture)
-    }
-
-    @objc private func handleTap() {
-        if timerManager.isTimerRunning {
-            timerManager.stopTimer()
-        } else {
-            timerManager.startTimer()
-        }
-    }
-    
-    @objc private func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
-        switch gesture.direction {
-        case .down:
-            timerManager.resetTimer()
-        default:
-            break
-        }
-    }
-    
-    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
-        let translation = gesture.translation(in: rulerScrollView)
-        let velocity = gesture.velocity(in: rulerScrollView)
-        let velocityFactor: CGFloat = 0.01 // 속도 조정 비율 (필요에 따라 조정 가능)
-        
-        let newOffsetX = rulerScrollView.contentOffset.x - translation.x - (velocity.x * velocityFactor)
-        rulerScrollView.contentOffset.x = max(0, min(newOffsetX, rulerScrollView.contentSize.width - rulerScrollView.bounds.width))
-        gesture.setTranslation(.zero, in: rulerScrollView)
-        
-        let currentOffset = rulerScrollView.contentOffset.x
-        updateTimeAndLabel(with: currentOffset)
-        
-        if gesture.state == .ended {
-            // 팬 제스처가 종료될 때, 가장 가까운 눈금으로 오프셋을 스냅
-            let nearestTickOffset = round(currentOffset / TimerConstants.TickInterval) * TimerConstants.TickInterval
-            UIView.animate(withDuration: 0.2) {
-                self.rulerScrollView.contentOffset.x = nearestTickOffset
-            }
-        }
-    }
-
     @objc private func timerDidEnd() {
         let alert = UIAlertController(title: "Timer Ended", message: "Tap to dismiss", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -151,6 +101,58 @@ final class MainViewController: UIViewController {
         // 스크롤뷰의 초기 오프셋을 설정하여 0초가 중앙에 오도록 조정
         let initialOffsetX = -view.bounds.width / 2
         rulerScrollView.setContentOffset(CGPoint(x: initialOffsetX, y: 0), animated: false)
+    }
+}
+
+extension MainViewController {
+    private func setupGestureRecognizers() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        view.addGestureRecognizer(tapGesture)
+        
+        let swipeDownGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
+        swipeDownGesture.direction = .down
+        view.addGestureRecognizer(swipeDownGesture)
+        
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        rulerScrollView.addGestureRecognizer(panGesture)
+    }
+    
+    @objc private func handleTap() {
+        if timerManager.isTimerRunning {
+            timerManager.stopTimer()
+        } else {
+            timerManager.startTimer()
+        }
+    }
+    
+    @objc private func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
+        switch gesture.direction {
+        case .down:
+            timerManager.resetTimer()
+        default:
+            break
+        }
+    }
+    
+    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: rulerScrollView)
+        let velocity = gesture.velocity(in: rulerScrollView)
+        let velocityFactor: CGFloat = 0.01
+        
+        let newOffsetX = rulerScrollView.contentOffset.x - translation.x - (velocity.x * velocityFactor)
+        rulerScrollView.contentOffset.x = max(0, min(newOffsetX, rulerScrollView.contentSize.width - rulerScrollView.bounds.width))
+        gesture.setTranslation(.zero, in: rulerScrollView)
+        
+        let currentOffset = rulerScrollView.contentOffset.x
+        updateTimeAndLabel(with: currentOffset)
+        
+        if gesture.state == .ended {
+            // 팬 제스처가 종료될 때, 가장 가까운 눈금으로 오프셋을 스냅
+            let nearestTickOffset = round(currentOffset / TimerConstants.TickInterval) * TimerConstants.TickInterval
+            UIView.animate(withDuration: 0.2) {
+                self.rulerScrollView.contentOffset.x = nearestTickOffset
+            }
+        }
     }
 }
 

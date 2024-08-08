@@ -31,6 +31,10 @@ final class MainViewController: UIViewController {
         view.backgroundColor = .red
         return view
     }()
+    
+    private let tickInterval: CGFloat = 10.0
+    private let maxTime: CGFloat = 600.0
+    private let timeStep: CGFloat = 5.0
 
     init(timerManager: TimerManager) {
         self.timerManager = timerManager
@@ -52,6 +56,10 @@ final class MainViewController: UIViewController {
         setupGestureRecognizers()
 
         NotificationCenter.default.addObserver(self, selector: #selector(timerDidEnd), name: .timerDidEnd, object: nil)
+
+        // 중앙을 초기 위치로 설정
+        scrollView.contentOffset.x = 0
+        updateScrollViewOffset()
     }
 
     private func setupUI() {
@@ -68,8 +76,8 @@ final class MainViewController: UIViewController {
         NSLayoutConstraint.activate([
             timeLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             timeLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.topAnchor.constraint(equalTo: timeLabel.bottomAnchor, constant: 20),
             scrollView.heightAnchor.constraint(equalToConstant: 50),
             rulerView.heightAnchor.constraint(equalTo: scrollView.heightAnchor),
@@ -77,7 +85,7 @@ final class MainViewController: UIViewController {
             rulerView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             rulerView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             rulerView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            rulerView.widthAnchor.constraint(equalToConstant: 6000), // Adjust this value as needed
+            rulerView.widthAnchor.constraint(equalToConstant: (maxTime / timeStep) * tickInterval + view.bounds.width),
             indicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             indicatorView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             indicatorView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
@@ -86,8 +94,7 @@ final class MainViewController: UIViewController {
     }
 
     private func setupRuler() {
-        let tickInterval: CGFloat = 10.0
-        let totalTicks = 600 / 5
+        let totalTicks = Int(maxTime / timeStep)
         for i in 0...totalTicks {
             let tickView = UIView()
             tickView.backgroundColor = .black
@@ -97,7 +104,7 @@ final class MainViewController: UIViewController {
             NSLayoutConstraint.activate([
                 tickView.widthAnchor.constraint(equalToConstant: 2),
                 tickView.heightAnchor.constraint(equalToConstant: i % 12 == 0 ? 30 : 15),
-                tickView.leadingAnchor.constraint(equalTo: rulerView.leadingAnchor, constant: CGFloat(i) * tickInterval),
+                tickView.leadingAnchor.constraint(equalTo: rulerView.leadingAnchor, constant: CGFloat(i) * tickInterval + view.bounds.width / 2),
                 tickView.centerYAnchor.constraint(equalTo: rulerView.centerYAnchor)
             ])
         }
@@ -138,8 +145,8 @@ final class MainViewController: UIViewController {
         scrollView.contentOffset.x = max(0, min(newOffsetX, scrollView.contentSize.width - scrollView.bounds.width))
         gesture.setTranslation(.zero, in: scrollView)
         
-        let step: CGFloat = 10.0
-        let value = scrollView.contentOffset.x / step * 5
+        let currentOffset = scrollView.contentOffset.x
+        let value = round(currentOffset / tickInterval) * timeStep
         timerManager.updateTime(to: TimeInterval(value))
         timeLabel.text = formattedTime(TimeInterval(value))
     }
@@ -154,12 +161,17 @@ final class MainViewController: UIViewController {
     private func formattedTime(_ time: TimeInterval) -> String {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
-        let milliseconds = Int((time - TimeInterval(minutes * 60) - TimeInterval(seconds)) * 100)
-        return String(format: "%02d:%02d.%02d", minutes, seconds, milliseconds)
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 
     private func playSound() {
         AudioServicesPlaySystemSound(1005)
+    }
+
+    private func updateScrollViewOffset() {
+        // 스크롤뷰의 초기 오프셋을 설정하여 0초가 중앙에 오도록 조정
+        let initialOffsetX = -view.bounds.width / 2
+        scrollView.setContentOffset(CGPoint(x: initialOffsetX, y: 0), animated: false)
     }
 }
 

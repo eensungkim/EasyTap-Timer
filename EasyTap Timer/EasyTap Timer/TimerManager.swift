@@ -15,6 +15,7 @@ protocol TimerManagerDelegate: AnyObject {
 
 final class TimerManager {
     private var userSetTime: TimeInterval = TimerConstants.InitialTimerValue
+    private lazy var initialTime: TimeInterval = userSetTime
     private lazy var remainingTime: TimeInterval = userSetTime {
         didSet {
             delegate?.timerDidUpdate(time: remainingTime)
@@ -39,7 +40,7 @@ final class TimerManager {
     }
 
     func stopTimer() {
-        userSetTime = remainingTime
+        initialTime = remainingTime
         timer?.invalidate()
         timer = nil
         isTimerRunning = false
@@ -60,10 +61,10 @@ final class TimerManager {
     private func updateTimer() {
         guard let startTime = startTime else { return }
         let elapsedTime = Date().timeIntervalSince(startTime)
-        remainingTime = userSetTime - elapsedTime
+        remainingTime = initialTime - elapsedTime
         if remainingTime <= 0 {
             stopTimer()
-            remainingTime = userSetTime
+            initialTime = userSetTime
             NotificationCenter.default.post(name: .timerDidEnd, object: nil)
         }
     }

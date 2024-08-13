@@ -102,6 +102,7 @@ final class MainViewController: UIViewController {
         content.body = "Tap to dismiss"
         content.sound = UNNotificationSound.default
 
+
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.01, repeats: false)
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request) { error in
@@ -110,10 +111,9 @@ final class MainViewController: UIViewController {
             }
         }
         
-        // 타이머 종료 후 시간 업데이트 및 소리 재생
+        // 타이머 종료 후 시간 업데이트
         let currentOffset = rulerScrollView.contentOffset.x
         updateTimeAndLabel(with: currentOffset)
-        playSound()
     }
     
     /// 스크롤 오프셋에 따라 타이머 시간과 라벨을 업데이트하는 메서드
@@ -131,11 +131,6 @@ final class MainViewController: UIViewController {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
         return String(format: "%02d:%02d", minutes, seconds)
-    }
-
-    /// 타이머 종료 시 소리를 재생하는 메서드
-    private func playSound() {
-        AudioServicesPlaySystemSound(1005)
     }
 
     /// 스크롤 뷰의 초기 오프셋을 설정하여 중앙에 0초가 오도록 조정하는 메서드
@@ -186,7 +181,7 @@ extension MainViewController {
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: rulerScrollView)
         let velocity = gesture.velocity(in: rulerScrollView)
-        let velocityFactor: CGFloat = 0.01
+        let velocityFactor: CGFloat = 0.005
         
         let newOffsetX = rulerScrollView.contentOffset.x - translation.x - (velocity.x * velocityFactor)
         rulerScrollView.contentOffset.x = max(0, min(newOffsetX, rulerScrollView.contentSize.width - rulerScrollView.bounds.width))

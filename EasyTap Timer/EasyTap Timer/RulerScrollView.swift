@@ -57,7 +57,7 @@ final class RulerScrollView: UIScrollView {
         let totalTicks = Int(TimerConstants.TotalTicks)
         for i in 0...totalTicks {
             let tickView = UIView()
-            tickView.backgroundColor = .black
+            tickView.backgroundColor = .systemGray
             tickView.translatesAutoresizingMaskIntoConstraints = false
             rulerView.addSubview(tickView)
 
